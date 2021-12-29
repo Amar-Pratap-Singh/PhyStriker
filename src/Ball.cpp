@@ -73,14 +73,14 @@ void Ball::rebound(Entity &e, int w, int h)
         ydir = -1 * ydir;
     }
 
-    else if (xcoor < 0 || xcoor + e.getCurrentFrame().w > w)
+    else if (xcoor < 0 || xcoor + e.getCurrentFrame().w > w/2)
     {
         xdir = -1 * xdir;
     }
     // speed -= 0.5;
 }
 
-void Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window)
+bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level)
 {
     e.setX(f.getX() + e.getCurrentFrame().w);
     e.setY(f.getY() + e.getCurrentFrame().h);
@@ -99,15 +99,16 @@ void Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window)
 
     if (a.h <= 0.0001 && a.w <= 0.0001)
     {
-        cout << "Level Finished\n";
-        // exit(0);
-        // Print score
-        // Level finished
-        // Everything reset
-        // New level loaded
+        flags.clear();
+        return false;
+        // print Ball In The Hole 
+        // Display score
+        // Next level
+        
     }
 
     e.setCurrFrame(a);
+    return true;
 }
 
 pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
@@ -122,8 +123,6 @@ pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
         // Collision from left and right
         if (xcoor + e.getCurrentFrame().w >= b.getX() && xcoor <= b.getX() + b.getCurrentFrame().w)
         {
-            cout << "Left Right"
-                 << "\n";
             xdir *= -1;
             // speed -= 0.5;
         }
@@ -135,7 +134,6 @@ pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
         // Collision from below and above
         if (ycoor + e.getCurrentFrame().h >= b.getY() && ycoor <= b.getY() + b.getCurrentFrame().h)
         {
-            cout << "Above Below\n";
             ydir *= -1;
             // speed -= 0.5;
         }
@@ -151,7 +149,7 @@ pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
     return {flagX, flagY};
 }
 
-void Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &window)
+bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &window, int level)
 {
     if (!speed)
         window.render(e);
@@ -166,9 +164,9 @@ void Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
 
         if (dropping)
         {
-            droppingBall(e, f, window);
+            bool running = droppingBall(e, f, window, level);
             window.render(e);
-            return;
+            return running;
         }
 
         if (x >= f.getX() + f.getCurrentFrame().w / 4 && x <= f.getX() + 3 * f.getCurrentFrame().w / 4 && y >= f.getY() + f.getCurrentFrame().h / 4 && y <= f.getY() + 3 * f.getCurrentFrame().h / 4)
@@ -179,13 +177,13 @@ void Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
             k = e.getCurrentFrame();
             k.h /= 2;
             k.w /= 2;
-            droppingBall(e, f, window);
+            bool running = droppingBall(e, f, window, level);
             window.render(e);
-            return;
+            return running;
         }
 
         // rebound condition
-        if ((xcoor + e.getCurrentFrame().w > window.w() || xcoor < 0) || (ycoor + e.getCurrentFrame().h > window.h() || ycoor < 0))
+        if ((xcoor + e.getCurrentFrame().w > window.w()/2 || xcoor < 0) || (ycoor + e.getCurrentFrame().h > window.h() || ycoor < 0))
         {
             rebound(e, window.w(), window.h());
         }
@@ -217,9 +215,12 @@ void Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
 
             // if (xdir && ydir)
             window.render(e);
-            speed -= 0.02;
+            speed -= 0.01;
         }
+
         // collision condition
         // cout << xcoor << "\t" << ycoor << "\n";
     }
+
+    return true;
 }

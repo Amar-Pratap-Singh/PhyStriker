@@ -12,86 +12,54 @@
 #include "RenderWindow.hpp"
 #include "Entity.hpp"
 #include "Ball.hpp"
+#include "Loader.hpp"
 
 using namespace std;
 
-// static float xdir = 1, ydir = 1;
-static int count = 0;
-// vector<pair<bool, bool>> flags;
+static int level = 2;
+static bool isClicked = true;
+static vector<Entity> blocks;
 
-int main(int argc, char *argv[])
+pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball)
 {
-    int state = 1;
+    isClicked = true;
+    Loader *loader = new Loader(textures);
+    // 0 : tile32 light
+    // 1 : tile32 dark
+    // 2 : tile64 light
+    // 3 : tile64 dark
+    // 4 : ball
+    // 5 : hole
+    // 6 : shadow
 
+    blocks = loader->load_tiles(level);
+    Entity e = blocks[blocks.size() - 1]; // ball
+    Entity f = blocks[blocks.size() - 2]; // hole
+
+    blocks.erase(blocks.end() - 1);
+    blocks.erase(blocks.end() - 1);
+
+    for (int i = 0; i < blocks.size(); i++)
+        ball->AddtoFlag({0, 0});
+
+    return {e, f};
+}
+
+void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window, SDL_Texture *bg)
+{
+    // int state = 1;
     const int FPS = 60;
-    const int frameDelay = 1000 / FPS;
+    const int frameDelay = 1000/FPS;
 
     Uint32 frameStart;
     int frameTime;
 
-    if (SDL_Init(SDL_INIT_VIDEO) > 0)
-    {
-        cout << "SDL_Init failure." << SDL_GetError() << endl;
-    }
+    pair<Entity, Entity> BallHole = levelLoader(textures, ball1);
 
-    if (!IMG_Init(IMG_INIT_PNG))
-    {
-        cout << "IMG_Init failure." << SDL_GetError() << endl;
-    }
-
-    RenderWindow window("GAME v1.0", 1200, 800);
-
-    SDL_Texture *ballTexture = window.loadTexture("images/ball.png");
-    SDL_Texture *holeTexture = window.loadTexture("images/hole.png");
-    SDL_Texture *bg2Texture = window.loadTexture("images/123.png");
-    SDL_Texture *blockTexture = window.loadTexture("images/block.png");
-    SDL_Texture *bgTexture = window.loadTexture("images/bg.png");
-    SDL_Texture *logoTexture = window.loadTexture("images/logo.png");
-    SDL_Texture *menuTexture = window.loadTexture("images/menu.png");
-    // SDL_Texture* pointTexture = window.loadTexture("images/point.png");
-    // SDL_Texture* tileDarkTexture32 = window.loadTexture("images/tile32_dark.png");
-    // SDL_Texture* tileDarkTexture64 = window.loadTexture("images/tile64_dark.png");
-    // SDL_Texture* tileLightTexture32 = window.loadTexture("images/tile32_light.png");
-    // SDL_Texture* tileLightTexture64 = window.loadTexture("images/tile64_light.png");
-    // SDL_Texture* ballShadowTexture = window.loadTexture("images/ball_shadow.png");
-    // SDL_Texture* uiBgTexture = window.loadTexture("images/UI_bg.png");
-    // SDL_Texture* levelTextBgTexture = window.loadTexture("images/levelText_bg.png");
-    // SDL_Texture* powerMeterTexture_FG = window.loadTexture("images/powermeter_fg.png");
-    // SDL_Texture* powerMeterTexture_BG = window.loadTexture("images/powermeter_bg.png");
-    // SDL_Texture* powerMeterTexture_overlay = window.loadTexture("images/powermeter_overlay.png");
-    // SDL_Texture* click2start = window.loadTexture("images/click2start.png");
-    // SDL_Texture* endscreenOverlayTexture = window.loadTexture("images/end.png");
-    // SDL_Texture* splashBgTexture = window.loadTexture("images/splashbg.png");
-
-    Ball *ball1 = new Ball();
-
-    Entity intro(50, 70, logoTexture);
-
-    Entity e(100, 400, ballTexture);
-    Entity f(308, 106, holeTexture);
-
-    Entity Block1(200, 300, blockTexture);
-    Entity Block2(500, 100, blockTexture);
-
-    SDL_Rect block1 = Block1.getCurrentFrame();
-    SDL_Rect block2 = Block2.getCurrentFrame();
-    block1.w *= 8;
-    block2.w *= 8;
-    block1.h *= 4;
-    block2.h *= 4;
-    Block1.setCurrFrame(block1);
-    Block2.setCurrFrame(block2);
-
-    vector<Entity> blocks;
-    blocks.push_back(Block1);
-    blocks.push_back(Block2);
-
-    for (int i = 0; i < blocks.size(); i++)
-        ball1->AddtoFlag({0, 0});
-
+    Entity e = BallHole.first;
+    Entity f = BallHole.second;
 
     bool game = true;
-    bool isClicked = true;
 
     SDL_Event event;
 
@@ -99,21 +67,21 @@ int main(int argc, char *argv[])
     {
         frameStart = SDL_GetTicks();
 
-        if (state == 0)
-        {
-            window.clear();
-            window.Background(menuTexture);
-        }
+        // if (state == 0)
+        // {
+        //     window.clear();
+        //     window.Background(menuTexture);
+        // }
 
-        else
+        window.clear();
+        window.Background(bg);
+        for (Entity x : blocks)
         {
-            window.clear();
-            window.Background(bg2Texture);
-            window.render(Block1);
-            window.render(Block2);
-            window.render(f);
-            ball1->moveBall(e, f, blocks, window);
+            window.render(x);
         }
+        window.render(f);
+        game = ball1->moveBall(e, f, blocks, window, level);
+    
 
         while (SDL_PollEvent(&event))
         {
@@ -131,10 +99,7 @@ int main(int argc, char *argv[])
                     if (!isClicked)
                     {
 
-                        cout << "Over Here\n";
-
                         isClicked = true;
-                        cout << "Released\n";
 
                         float xcoor = e.getX();
                         float ycoor = e.getY();
@@ -144,17 +109,19 @@ int main(int argc, char *argv[])
 
                         // mouse should not be released at the same point as ball
                         float xDir = abs(xcoor - x);
-                        float yDir = abs(ycoor - y); 
+                        float yDir = abs(ycoor - y);
                         ball1->setXdir(xDir);
                         ball1->setYdir(yDir);
 
                         // xdir = ydir/xdir;
 
-                        if (x > xcoor){
+                        if (x > xcoor)
+                        {
                             xDir = -1 * xDir;
                             ball1->setXdir(xDir);
                         }
-                        if (y > ycoor){
+                        if (y > ycoor)
+                        {
                             yDir = -1 * yDir;
                             ball1->setYdir(yDir);
                         }
@@ -186,7 +153,6 @@ int main(int argc, char *argv[])
                     if (xcoor - currFrame.w <= x && xcoor + currFrame.w >= x && ycoor - currFrame.h <= y && ycoor + currFrame.h >= y)
                     {
                         isClicked = false;
-                        cout << "Pressed\n";
                         // cout << x << "\t" << y <<"\n";
                     }
                 }
@@ -210,7 +176,57 @@ int main(int argc, char *argv[])
 
         window.display();
     }
+    // window.cleanUp();
+}
 
+int main(int argc, char *argv[])
+{
+
+    if (SDL_Init(SDL_INIT_VIDEO) > 0)
+    {
+        cout << "SDL_Init failure." << SDL_GetError() << endl;
+    }
+
+    if (!IMG_Init(IMG_INIT_PNG))
+    {
+        cout << "IMG_Init failure." << SDL_GetError() << endl;
+    }
+
+    RenderWindow window("GAME v1.0", 1280, 720);
+
+    SDL_Texture *ballTexture = window.loadTexture("images/ball.png");
+    SDL_Texture *holeTexture = window.loadTexture("images/hole.png");
+    SDL_Texture *bg2Texture = window.loadTexture("images/123.png");
+    SDL_Texture *blockTexture = window.loadTexture("images/block.png");
+    SDL_Texture *bgTexture = window.loadTexture("images/bg.png");
+    SDL_Texture *logoTexture = window.loadTexture("images/logo.png");
+    SDL_Texture *menuTexture = window.loadTexture("images/menu.png");
+    SDL_Texture *pointTexture = window.loadTexture("images/point.png");
+    SDL_Texture *tileDarkTexture32 = window.loadTexture("images/tile32_dark.png");
+    SDL_Texture *tileDarkTexture64 = window.loadTexture("images/tile64_dark.png");
+    SDL_Texture *tileLightTexture32 = window.loadTexture("images/tile32_light.png");
+    SDL_Texture *tileLightTexture64 = window.loadTexture("images/tile64_light.png");
+    SDL_Texture *ballShadowTexture = window.loadTexture("images/ball_shadow.png");
+    SDL_Texture *uiBgTexture = window.loadTexture("images/UI_bg.png");
+    SDL_Texture *levelTextBgTexture = window.loadTexture("images/levelText_bg.png");
+    SDL_Texture *powerMeterTexture_FG = window.loadTexture("images/powermeter_fg.png");
+    SDL_Texture *powerMeterTexture_BG = window.loadTexture("images/powermeter_bg.png");
+    SDL_Texture *powerMeterTexture_overlay = window.loadTexture("images/powermeter_overlay.png");
+    SDL_Texture *click2start = window.loadTexture("images/click2start.png");
+    SDL_Texture *endscreenOverlayTexture = window.loadTexture("images/end.png");
+    // SDL_Texture* splashBgTexture = window.loadTexture("images/splashbg.png");
+
+    Entity intro(50, 70, logoTexture);
+
+    vector<SDL_Texture *> textures = {tileLightTexture32, tileDarkTexture32, tileLightTexture64, tileDarkTexture64, ballTexture, holeTexture, ballShadowTexture};
+    
+    while (level <= 7){
+        Ball *ball = new Ball();
+        PhyStriker(textures, ball, window, bg2Texture);
+        cout << "Level Finished\n";
+        level++;
+    }
+    
     window.cleanUp();
     SDL_Quit();
     return 0;
