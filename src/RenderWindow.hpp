@@ -8,8 +8,9 @@ class RenderWindow
 	private:
 		SDL_Window* window;
 		SDL_Renderer* renderer;
-		// int height;
-		// int width;
+		int windowHeight;
+		int windowWidth;
+
 	public:
 		RenderWindow(const char* p_title, int p_w, int p_h);
 		SDL_Texture* loadTexture(const char* p_filePath);
@@ -19,4 +20,6 @@ class RenderWindow
 		void display();
 		void Background(SDL_Texture* bg);
 		void rndr(SDL_Rect &wall);
+		int h();
+		int w();
 };

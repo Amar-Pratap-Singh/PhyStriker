@@ -73,7 +73,7 @@ void Ball::rebound(Entity &e, int w, int h)
         ydir = -1 * ydir;
     }
 
-    else if (xcoor < 0 || xcoor + e.getCurrentFrame().w > w/2)
+    else if (xcoor < 0 || xcoor + e.getCurrentFrame().w > w)
     {
         xdir = -1 * xdir;
     }
