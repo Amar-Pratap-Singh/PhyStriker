@@ -80,6 +80,7 @@ void Ball::rebound(Entity &e, int w, int h)
     // speed -= 0.5;
 }
 
+// *************************** Ball in the hole *****************************************
 bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level)
 {
     e.setX(f.getX() + e.getCurrentFrame().w);
@@ -99,6 +100,8 @@ bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level)
 
     if (a.h <= 0.0001 && a.w <= 0.0001)
     {
+        // speed = 0;
+        dropping = false;
         flags.clear();
         return false;
         // print Ball In The Hole 
@@ -111,6 +114,7 @@ bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level)
     return true;
 }
 
+// ***************************************** Collision ************************************
 pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
 {
 
@@ -149,6 +153,8 @@ pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
     return {flagX, flagY};
 }
 
+
+// **************************************** Move Ball ***********************************************
 bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &window, int level)
 {
     if (!speed)
@@ -171,7 +177,6 @@ bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
 
         if (x >= f.getX() + f.getCurrentFrame().w / 4 && x <= f.getX() + 3 * f.getCurrentFrame().w / 4 && y >= f.getY() + f.getCurrentFrame().h / 4 && y <= f.getY() + 3 * f.getCurrentFrame().h / 4)
         {
-            // window.render(e);
             dropping = true;
             SDL_Rect k;
             k = e.getCurrentFrame();

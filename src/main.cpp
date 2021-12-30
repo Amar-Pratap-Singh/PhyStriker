@@ -1,9 +1,9 @@
+// Displaying something on screen, like strike: 1, strike: 2, strike: 3 
 // Correct the positioning of collision
 // Score system
-// Displaying something on screen, like strike: 1, strike: 2, strike: 3
 // maintain a list f top 5 games played till now with their high score and player name
-// Sound effect
-// Making a ball class
+// Sound effect 
+// Making a ball class DONE
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -16,7 +16,7 @@
 
 using namespace std;
 
-static int level = 2;
+static int level = 1;
 static bool isClicked = true;
 static vector<Entity> blocks;
 
@@ -24,7 +24,7 @@ pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball)
 {
     isClicked = true;
     Loader *loader = new Loader(textures);
-    // 0 : tile32 light
+    // 0 : tile32 light 
     // 1 : tile32 dark
     // 2 : tile64 light
     // 3 : tile64 dark
@@ -34,7 +34,9 @@ pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball)
 
     blocks = loader->load_tiles(level);
     Entity e = blocks[blocks.size() - 1]; // ball
+    // cout << e.getX() <<" " << e.getY() <<"\n";
     Entity f = blocks[blocks.size() - 2]; // hole
+    // cout << f.getX() <<" " << f.getY() <<"\n\n";
 
     blocks.erase(blocks.end() - 1);
     blocks.erase(blocks.end() - 1);
@@ -49,7 +51,7 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
 {
     // int state = 1;
     const int FPS = 60;
-    const int frameDelay = 1000/FPS;
+    const int frameDelay = 1000 / FPS;
 
     Uint32 frameStart;
     int frameTime;
@@ -67,12 +69,6 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
     {
         frameStart = SDL_GetTicks();
 
-        // if (state == 0)
-        // {
-        //     window.clear();
-        //     window.Background(menuTexture);
-        // }
-
         window.clear();
         window.Background(bg);
         for (Entity x : blocks)
@@ -80,8 +76,16 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
             window.render(x);
         }
         window.render(f);
-        game = ball1->moveBall(e, f, blocks, window, level);
-    
+
+        bool LevelRunning = ball1->moveBall(e, f, blocks, window, level);
+        
+        if (!LevelRunning){
+            level++;
+            BallHole = levelLoader(textures, ball1);
+            e = BallHole.first;
+            f = BallHole.second;
+            continue;
+        }
 
         while (SDL_PollEvent(&event))
         {
@@ -98,11 +102,10 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
 
                     if (!isClicked)
                     {
-
                         isClicked = true;
 
-                        float xcoor = e.getX();
-                        float ycoor = e.getY();
+                        float xcoor = e.getX() + e.getCurrentFrame().w/2;
+                        float ycoor = e.getY() + e.getCurrentFrame().h/2;
                         int x, y;
                         Uint32 buttons;
                         buttons = SDL_GetMouseState(&x, &y);
@@ -110,6 +113,9 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
                         // mouse should not be released at the same point as ball
                         float xDir = abs(xcoor - x);
                         float yDir = abs(ycoor - y);
+
+                        // float slope = atan(yDir/xDir); 
+
                         ball1->setXdir(xDir);
                         ball1->setYdir(yDir);
 
@@ -219,14 +225,11 @@ int main(int argc, char *argv[])
     Entity intro(50, 70, logoTexture);
 
     vector<SDL_Texture *> textures = {tileLightTexture32, tileDarkTexture32, tileLightTexture64, tileDarkTexture64, ballTexture, holeTexture, ballShadowTexture};
-    
-    while (level <= 7){
-        Ball *ball = new Ball();
-        PhyStriker(textures, ball, window, bg2Texture);
-        cout << "Level Finished\n";
-        level++;
-    }
-    
+
+    Ball *ball = new Ball();
+    PhyStriker(textures, ball, window, bg2Texture);
+    cout << "Level Finished\n";
+
     window.cleanUp();
     SDL_Quit();
     return 0;
