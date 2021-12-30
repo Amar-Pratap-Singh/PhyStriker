@@ -1,4 +1,5 @@
 #include "Ball.hpp"
+#include"SDL_mixer.h"
 
 float Ball::xdir = 1;
 float Ball::ydir = 1;
@@ -38,7 +39,7 @@ void Ball::setDroppingState(bool state)
 
 pair<float, float> Ball::getBallDir()
 {
-    return {xdir, ydir};
+    return { xdir, ydir };
 }
 
 void Ball::setXdir(float newDir)
@@ -63,7 +64,7 @@ void Ball::setSpeed(float s)
 
 // ************************************************************************************
 
-void Ball::rebound(Entity &e, int w, int h)
+void Ball::rebound(Entity& e, int w, int h)
 {
     float xcoor = e.getX();
     float ycoor = e.getY();
@@ -81,7 +82,7 @@ void Ball::rebound(Entity &e, int w, int h)
 }
 
 // *************************** Ball in the hole *****************************************
-bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level)
+bool Ball::droppingBall(Entity& e, Entity& f, RenderWindow& window, int level,Mix_Chunk* hole)
 {
     e.setX(f.getX() + e.getCurrentFrame().w);
     e.setY(f.getY() + e.getCurrentFrame().h);
@@ -101,13 +102,15 @@ bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level)
     if (a.h <= 0.0001 && a.w <= 0.0001)
     {
         // speed = 0;
+        Mix_PlayChannel(-1, hole, 0);
         dropping = false;
         flags.clear();
+        
         return false;
         // print Ball In The Hole 
         // Display score
         // Next level
-        
+
     }
 
     e.setCurrFrame(a);
@@ -115,7 +118,7 @@ bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level)
 }
 
 // ***************************************** Collision ************************************
-pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
+pair<bool, bool> Ball::Collision(Entity& e, Entity& b, bool flagX, bool flagY)
 {
 
     float xcoor = e.getX();
@@ -150,12 +153,12 @@ pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
         flagY = 0;
     }
 
-    return {flagX, flagY};
+    return { flagX, flagY };
 }
 
 
 // **************************************** Move Ball ***********************************************
-bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &window, int level)
+bool Ball::moveBall(Entity& e, Entity& f, vector<Entity>& b, RenderWindow& window, int level,Mix_Chunk * hole)
 {
     if (!speed)
         window.render(e);
@@ -170,7 +173,7 @@ bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
 
         if (dropping)
         {
-            bool running = droppingBall(e, f, window, level);
+            bool running = droppingBall(e, f, window, level,hole);
             window.render(e);
             return running;
         }
@@ -182,15 +185,15 @@ bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
             k = e.getCurrentFrame();
             k.h /= 2;
             k.w /= 2;
-            bool running = droppingBall(e, f, window, level);
+            bool running = droppingBall(e, f, window, level,hole);
             window.render(e);
             return running;
         }
 
         // rebound condition
-        if ((xcoor + e.getCurrentFrame().w > window.w()/2 || xcoor < 0) || (ycoor + e.getCurrentFrame().h > window.h() || ycoor < 0))
+        if ((xcoor + e.getCurrentFrame().w > window.w / 2 || xcoor < 0) || (ycoor + e.getCurrentFrame().h > window.h || ycoor < 0))
         {
-            rebound(e, window.w(), window.h());
+            rebound(e, window.w, window.h);
         }
 
         SDL_Rect firstObj = e.getCurrentFrame();
@@ -229,3 +232,4 @@ bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
 
     return true;
 }
+
