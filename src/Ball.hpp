@@ -4,7 +4,7 @@
 #include <vector>
 #include "Entity.hpp"
 #include "RenderWindow.hpp"
-#include"SDL_mixer.h"
+// #include "SDL_mixer.h"
 
 using namespace std;
 
@@ -20,12 +20,12 @@ private:
 
 public:
     Ball();
-    bool droppingBall(Entity& e, Entity& f, RenderWindow& window, int level,Mix_Chunk* hole);
+    bool droppingBall(Entity &e, Entity &f, RenderWindow &window, int level/*, Mix_Chunk *hole*/);
     // Collision with walls
-    void rebound(Entity& e, int w, int h);
+    void rebound(Entity &e, int w, int h);
     // Collision with obstacles
-    pair<bool, bool> Collision(Entity& e, Entity& b, bool flagX, bool flagY);
-    bool moveBall(Entity& e, Entity& f, vector<Entity>& b, RenderWindow& window, int level,Mix_Chunk* hole);
+    pair<bool, bool> Collision(Entity &e, Entity &b, bool flagX, bool flagY);
+    bool moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &window, int level /*, Mix_Chunk *hole */);
     void AddtoFlag(pair<bool, bool> flag);
 
     // Getters and Setters

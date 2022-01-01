@@ -17,5 +17,6 @@ private:
 	SDL_Texture *screen;
 	Button *play;
 	Button *exit;
+	Button *TopScores;
 	SDL_Event Events;
 };

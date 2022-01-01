@@ -46,6 +46,15 @@ void RenderWindow::render(Entity &p_entity){
     SDL_RenderCopy(renderer, p_entity.getTex(), &src, &dst);
 }
 
+void RenderWindow::DrawRectangle(SDL_Texture* tex, int x_pos, int y_pos, int w, int h) {
+	SDL_Rect* box = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+	box->x = x_pos;
+	box->y = y_pos;
+	box->w = w;
+	box->h = h;
+	SDL_RenderCopy(renderer, tex, NULL, box);
+}
+
 void RenderWindow::Background(SDL_Texture* bg){
     SDL_RenderCopy(renderer, bg, NULL, NULL);
 }
