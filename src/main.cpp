@@ -3,11 +3,9 @@
 // Displaying something on screen, like strike: 1, strike: 2, strike: 3
 // maintain a list f top 5 games played till now with their high score and player name
 // Sound effect
-// Making a ball class
 
-#include <SDL.h>
-#include <SDL_image.h>
-
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <iostream>
 #include <vector>
 #include <iterator>
@@ -16,7 +14,8 @@
 #include "Entity.hpp"
 #include "Ball.hpp"
 #include "Loader.hpp"
-#include "SDL_mixer.h"
+#include "Menu.hpp"
+// #include "SDL2/SDL_mixer.h"
 
 using namespace std;
 
@@ -25,10 +24,10 @@ static bool isClicked = true;
 static priority_queue<pair<int, string>> scores;
 static vector<Entity> blocks;
 
-pair<Entity, Entity> levelLoader(vector<SDL_Texture*> textures, Ball* ball)
+pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball)
 {
     isClicked = true;
-    Loader* loader = new Loader(textures);
+    Loader *loader = new Loader(textures);
     // 0 : tile32 light
     // 1 : tile32 dark
     // 2 : tile64 light
@@ -47,12 +46,12 @@ pair<Entity, Entity> levelLoader(vector<SDL_Texture*> textures, Ball* ball)
     blocks.erase(blocks.end() - 1);
 
     for (int i = 0; i < blocks.size(); i++)
-        ball->AddtoFlag({ 0, 0 });
+        ball->AddtoFlag({0, 0});
 
-    return { e, f };
+    return {e, f};
 }
 
-void PhyStriker(vector<SDL_Texture*> textures, Ball* ball1, RenderWindow window,  SDL_Texture* bg, Mix_Chunk * swing, Mix_Chunk* hole)
+void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window, SDL_Texture *bg)
 {
     // int state = 1;
     const int FPS = 60;
@@ -68,8 +67,11 @@ void PhyStriker(vector<SDL_Texture*> textures, Ball* ball1, RenderWindow window,
 
     bool game = true;
 
+    SDL_Event event;
+
     while (game)
     {
+        
         frameStart = SDL_GetTicks();
 
         window.clear();
@@ -80,7 +82,7 @@ void PhyStriker(vector<SDL_Texture*> textures, Ball* ball1, RenderWindow window,
         }
         window.render(f);
 
-        bool LevelRunning = ball1->moveBall(e, f, blocks, window, level, hole);
+        bool LevelRunning = ball1->moveBall(e, f, blocks, window, level);
 
         if (!LevelRunning)
         {
@@ -90,7 +92,7 @@ void PhyStriker(vector<SDL_Texture*> textures, Ball* ball1, RenderWindow window,
             f = BallHole.second;
             continue;
         }
-        SDL_Event event;
+        // SDL_Event event;
 
         while (SDL_PollEvent(&event))
         {
@@ -145,7 +147,7 @@ void PhyStriker(vector<SDL_Texture*> textures, Ball* ball1, RenderWindow window,
 
                         ball1->setSpeed(min(maxV, radialDis));
                         ball1->setMovingState(false);
-                        Mix_PlayChannel(-1, swing, 0);
+                        // Mix_PlayChannel(-1, swing, 0);
                     }
                 }
 
@@ -169,15 +171,6 @@ void PhyStriker(vector<SDL_Texture*> textures, Ball* ball1, RenderWindow window,
                     }
                 }
             }
-
-            // if (SDL_BUTTON(SDL_BUTTON_LEFT)){
-            //     cout << "Working\n";
-            // }
-
-            // if (SDL_BUTTON(SDL_BUTTON_RIGHT))
-            //     cout << "Right Working\n";
-            // if (event.type == SDL_MouseButtonEvent)
-            // dot.handleEvent(event);
         }
 
         frameTime = SDL_GetTicks() - frameStart;
@@ -188,36 +181,39 @@ void PhyStriker(vector<SDL_Texture*> textures, Ball* ball1, RenderWindow window,
 
         window.display();
     }
-    // window.cleanUp();
 }
 
-
-void HighScores() {
-    vector <pair<int, string>> displayScores;
+void HighScores()
+{
+    vector<pair<int, string>> displayScores;
     int index = 1;
 
-    if (scores.size() < 5) {
-        while (!scores.empty()) {
+    if (scores.size() < 5)
+    {
+        while (!scores.empty())
+        {
             displayScores.push_back(scores.top());
             scores.pop();
         }
     }
-    else {
-        while (displayScores.size() != 5) {
+    else
+    {
+        while (displayScores.size() != 5)
+        {
             displayScores.push_back(scores.top());
             scores.pop();
         }
     }
 
-    for (auto x : displayScores) {
+    for (auto x : displayScores)
+    {
         // Render this text message onto screen
         cout << index++ << "\t" << x.second << "  " << x.first << "\n";
         scores.push(x);
     }
 }
 
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 
     if (SDL_Init(SDL_INIT_VIDEO) > 0)
@@ -232,75 +228,54 @@ int main(int argc, char* argv[])
 
     RenderWindow window("PhyStriker", 640, 720);
 
-    SDL_Texture* ballTexture = window.loadTexture("images/ball.png");
-    SDL_Texture* holeTexture = window.loadTexture("images/hole.png");
-    SDL_Texture* bg2Texture = window.loadTexture("images/1232.png");
-    SDL_Texture* blockTexture = window.loadTexture("images/block.png");
-    SDL_Texture* bgTexture = window.loadTexture("images/bg.png");
-    SDL_Texture* logoTexture = window.loadTexture("images/logo.png");
-    SDL_Texture* menuTexture = window.loadTexture("images/menu.png");
-    SDL_Texture* pointTexture = window.loadTexture("images/point.png");
-    SDL_Texture* tileDarkTexture32 = window.loadTexture("images/tile32_dark.png");
-    SDL_Texture* tileDarkTexture64 = window.loadTexture("images/tile64_dark.png");
-    SDL_Texture* tileLightTexture32 = window.loadTexture("images/tile32_light.png");
-    SDL_Texture* tileLightTexture64 = window.loadTexture("images/tile64_light.png");
-    SDL_Texture* ballShadowTexture = window.loadTexture("images/ball_shadow.png");
-    SDL_Texture* uiBgTexture = window.loadTexture("images/UI_bg.png");
-    SDL_Texture* levelTextBgTexture = window.loadTexture("images/levelText_bg.png");
-    SDL_Texture* powerMeterTexture_FG = window.loadTexture("images/powermeter_fg.png");
-    SDL_Texture* powerMeterTexture_BG = window.loadTexture("images/powermeter_bg.png");
-    SDL_Texture* powerMeterTexture_overlay = window.loadTexture("images/powermeter_overlay.png");
-    SDL_Texture* click2start = window.loadTexture("images/click2start.png");
-    SDL_Texture* endscreenOverlayTexture = window.loadTexture("images/end.png");
-    SDL_Texture* playButton = window.loadTexture("images/Play.png");
-    SDL_Texture* RestartButton = window.loadTexture("images/Restart.jpg");
-    SDL_Texture* high_Scores = window.loadTexture("images/HighScore.png");
+    SDL_Texture *ballTexture = window.loadTexture("images/ball.png");
+    SDL_Texture *holeTexture = window.loadTexture("images/hole.png");
+    SDL_Texture *bg2Texture = window.loadTexture("images/1232.png");
+    SDL_Texture *blockTexture = window.loadTexture("images/block.png");
+    SDL_Texture *bgTexture = window.loadTexture("images/bg.png");
+    SDL_Texture *logoTexture = window.loadTexture("images/logo.png");
+    SDL_Texture *menuTexture = window.loadTexture("images/menu.png");
+    SDL_Texture *pointTexture = window.loadTexture("images/point.png");
+    SDL_Texture *tileDarkTexture32 = window.loadTexture("images/tile32_dark.png");
+    SDL_Texture *tileDarkTexture64 = window.loadTexture("images/tile64_dark.png");
+    SDL_Texture *tileLightTexture32 = window.loadTexture("images/tile32_light.png");
+    SDL_Texture *tileLightTexture64 = window.loadTexture("images/tile64_light.png");
+    SDL_Texture *ballShadowTexture = window.loadTexture("images/ball_shadow.png");
+    SDL_Texture *uiBgTexture = window.loadTexture("images/UI_bg.png");
+    SDL_Texture *levelTextBgTexture = window.loadTexture("images/levelText_bg.png");
+    SDL_Texture *powerMeterTexture_FG = window.loadTexture("images/powermeter_fg.png");
+    SDL_Texture *powerMeterTexture_BG = window.loadTexture("images/powermeter_bg.png");
+    SDL_Texture *powerMeterTexture_overlay = window.loadTexture("images/powermeter_overlay.png");
+    SDL_Texture *click2start = window.loadTexture("images/click2start.png");
+    SDL_Texture *endscreenOverlayTexture = window.loadTexture("images/end.png");
+    SDL_Texture *playButton = window.loadTexture("images/Play.png");
+    SDL_Texture *RestartButton = window.loadTexture("images/Restart.jpg");
+    SDL_Texture *high_Scores = window.loadTexture("images/HighScore.png");
 
-    Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+    // Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 
-    // SDL_Texture* splashBgTexture = window.loadTexture("images/splashbg.png");
-    Mix_Chunk* charge = Mix_LoadWAV("sfx/charge.mp3");
-    Mix_Chunk* swing = Mix_LoadWAV("sfx/swing.mp3");
-    Mix_Chunk* hole = Mix_LoadWAV("sfx/hole.mp3");
-
+    // // SDL_Texture* splashBgTexture = window.loadTexture("images/splashbg.png");
+    // Mix_Chunk* charge = Mix_LoadWAV("sfx/charge.mp3");
+    // Mix_Chunk* swing = Mix_LoadWAV("sfx/swing.mp3");
+    // Mix_Chunk* hole = Mix_LoadWAV("sfx/hole.mp3");
 
     Entity intro(50, 70, logoTexture);
     Entity startButton(100, 200, playButton);
     Entity highScores(400, 200, high_Scores);
 
-    bool StartTheGame = true;
-    bool ViewHighScores = false;
+    Menu *menu = new Menu(&window);
+    
+    menu->MenuLoop();
+    if (menu->getWindowType() == "Exit" || menu->getWindowType() == "Main_Menu"){
+        return 0;
+    }
 
-    // while (SDL_PollEvent(&event)){
-    //     window.clear();
-    //     window.Background(menuTexture);
-    //     window.render(intro);
-    //     window.render(startButton);
-    //     window.render(highScores);
+    else if (menu->getWindowType() == "Game"){
+        vector<SDL_Texture *> textures = {tileLightTexture32, tileDarkTexture32, tileLightTexture64, tileDarkTexture64, ballTexture, holeTexture, ballShadowTexture};
 
-    //     if (event.type == SDL_QUIT){
-    //         StartTheGame = true;
-    //     }
-    //         // break;
-
-    //     // if (mouse over playButton){
-    //     //     StartTheGame = true;
-    //     //     break;
-    //     // }
-
-    //     // if (!ViewHighScores && mouse over highScores button){
-    //     //     ViewHighScores = true;
-    //     //     HighScores();
-    //     // }
-    // }
-
-    // if (StartTheGame){
-    vector<SDL_Texture*> textures = { tileLightTexture32, tileDarkTexture32, tileLightTexture64, tileDarkTexture64, ballTexture, holeTexture, ballShadowTexture };
-
-    Ball* ball = new Ball();
-    PhyStriker(textures, ball, window, bg2Texture,swing,hole);
-    cout << "Level Finished\n";
-    // }
+        Ball *ball = new Ball();
+        PhyStriker(textures, ball, window, bg2Texture);
+    }
 
     window.cleanUp();
     SDL_Quit();
