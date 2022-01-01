@@ -20,6 +20,7 @@ class RenderWindow
 		void display();
 		void Background(SDL_Texture* bg);
 		void rndr(SDL_Rect &wall);
+		void DrawRectangle(SDL_Texture *tex, int x, int y, int w, int h);
 		int h();
 		int w();
 };
