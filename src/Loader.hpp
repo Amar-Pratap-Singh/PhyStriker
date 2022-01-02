@@ -145,7 +145,7 @@ public:
 			case (6):
 			{
 				tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 8, entities[0]));
-				tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 6, entities[1]));
+				//tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 6, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 4, entities[0]));
 				tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 10, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 12, entities[0]));
@@ -170,7 +170,7 @@ public:
 
 				tiles.push_back(Tile(24 + 32 * 6, 24 + 32 * 10, entities[0]));
 				tiles.push_back(Tile(24 + 32 * 6, 24 + 32 * 8, entities[1]));
-				tiles.push_back(Tile(24 + 32 * 8, 24 + 32 * 8, entities[0]));
+				//tiles.push_back(Tile(24 + 32 * 8, 24 + 32 * 8, entities[0]));
 				tiles.push_back(Tile(24 + 32 * 10, 24 + 32 * 8, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 10, 24 + 32 * 10, entities[0]));
 
@@ -197,9 +197,9 @@ public:
 				tiles.push_back(Tile(24 + 32 * 12, 24 + 32 * 10, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 12, 24 + 32 * 12, entities[0]));
 
-				tiles.push_back(Tile(24 + 32 * 6, 24 + 32 * 12, entities[1]));
+				//tiles.push_back(Tile(24 + 32 * 6, 24 + 32 * 12, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 8, 24 + 32 * 12, entities[0]));
-				tiles.push_back(Tile(24 + 32 * 10, 24 + 32 * 12, entities[1]));
+				//tiles.push_back(Tile(24 + 32 * 10, 24 + 32 * 12, entities[1]));
 
 				tiles.push_back(Tile(24 + 32 * 6, 24 + 32 * 2, entities[0]));
 				tiles.push_back(Tile(24 + 32 * 8, 24 + 32 * 0, entities[1]));
@@ -209,7 +209,7 @@ public:
 				tiles.push_back(Tile(24 + 32 * 6, 24 + 32 * 8, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 8, 24 + 32 * 8, entities[0]));
 				tiles.push_back(Tile(24 + 32 * 10, 24 + 32 * 8, entities[1]));
-				tiles.push_back(Tile(24 + 32 * 10, 24 + 32 * 10, entities[0]));
+				//tiles.push_back(Tile(24 + 32 * 10, 24 + 32 * 10, entities[0]));
 
 				tiles.push_back(Tile(24 + 32 * 3, 24 + 32 * 2, entities[0]));
 				tiles.push_back(Tile(24 + 32 * 3, 24 + 32 * 4, entities[0]));
@@ -221,7 +221,7 @@ public:
 				tiles.push_back(Tile(24 + 32 * 9, 24 + 32 * 4, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 9, 24 + 32 * 6, entities[1]));
 				tiles.push_back(Tile(24 + 32 * 9, 24 + 32 * 8, entities[1]));
-				tiles.push_back(Tile(24 + 32 * 9, 24 + 32 * 10, entities[1]));
+				//tiles.push_back(Tile(24 + 32 * 9, 24 + 32 * 10, entities[1]));
 
 				tiles.push_back(Tile(24 + 32 * 15, 24 + 32 * 2, entities[0]));
 				tiles.push_back(Tile(24 + 32 * 15, 24 + 32 * 4, entities[0]));
