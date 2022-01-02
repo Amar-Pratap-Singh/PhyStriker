@@ -23,6 +23,7 @@ static int level = 1;
 static bool isClicked = true;
 static priority_queue<pair<int, string>> scores;
 static vector<Entity> blocks;
+static vector<Entity> pointerAndMeters;
 
 pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball)
 {
@@ -65,7 +66,37 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
     Entity e = BallHole.first;
     Entity f = BallHole.second;
 
+    SDL_Texture *pointTexture = window.loadTexture("images/point.png");
+    SDL_Texture *powerMeterTexture_GG1 = window.loadTexture("images/powermeter_gg1.png");
+    SDL_Texture *powerMeterTexture_GG2 = window.loadTexture("images/powermeter_gg2.png");
+    SDL_Texture *powerMeterTexture_GG3 = window.loadTexture("images/powermeter_gg3.png");
+    SDL_Texture *powerMeterTexture_GG4 = window.loadTexture("images/powermeter_gg4.png");
+    SDL_Texture *powerMeterTexture_GG5 = window.loadTexture("images/powermeter_gg5.png");
+    SDL_Texture *powerMeterTexture_GG = window.loadTexture("images/powermeter_gg.png");
+    SDL_Texture *powerMeterTexture_overlay = window.loadTexture("images/powermeter_overlay.png");
+    
+    Entity p(e.getX(), e.getY(), pointTexture);
+    Entity pm1(50, 8, powerMeterTexture_GG1);
+    Entity pm2(50, 8, powerMeterTexture_GG2);
+    Entity pm3(50, 8, powerMeterTexture_GG3);
+    Entity pm4(50, 8, powerMeterTexture_GG4);
+    Entity pm5(50, 8, powerMeterTexture_GG5);
+    Entity pm6(50, 8, powerMeterTexture_GG);
+    Entity pm(50, 8, powerMeterTexture_overlay);
+    SDL_Rect resize;
+    resize.x = 0;
+    resize.y = 0;
+    resize.w = 16;
+    resize.h = 32;
+
+    pointerAndMeters = {p, pm1, pm2, pm3, pm4, pm5, pm6, pm};
+
+    for (int z = 1; z < pointerAndMeters.size() ; z++){
+        pointerAndMeters[z].setCurrFrame(resize);
+    }
+
     bool game = true;
+    int holding = 0;
 
     SDL_Event event;
     MouseInput *mouse = new MouseInput();
@@ -83,7 +114,7 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
         }
         window.render(f);
 
-        bool LevelRunning = ball1->moveBall(e, f, blocks, window, level);
+        bool LevelRunning = ball1->moveBall(e, f, blocks, window, level, pointerAndMeters);
 
         // Restart condition
         if (restart->isButtonClicked(mouse))
@@ -104,6 +135,36 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
             continue;
         }
         // SDL_Event event;
+        int x, y;
+        Uint32 buttons;
+        buttons = SDL_GetMouseState(&x, &y);
+
+        if (holding){
+            float temp = sqrt(pow(x-e.getX()-e.getCurrentFrame().w/2, 2) + pow(y-e.getY()-e.getCurrentFrame().h/2, 2));  
+            int index = 0;
+
+            if (temp <= 10)
+                index = 1;
+
+            else if (temp < 20)
+                index = 2;
+
+            else if (temp < 40)
+                index = 3;
+
+            else if (temp < 60)
+                index = 4;
+
+            else if (temp < 85)
+                index = 5;
+
+            else if (temp > 85) 
+                index = 6;
+            
+            // window.render(pointerAndMeters[0]);
+            window.render(pointerAndMeters[index]);
+            window.render(pointerAndMeters[pointerAndMeters.size()-1]);
+        }
 
         while (SDL_PollEvent(&event))
         {
@@ -117,6 +178,7 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
             {
                 if (event.type == SDL_MOUSEBUTTONUP)
                 {
+                    // window.render(p);
 
                     if (!isClicked)
                     {
@@ -124,8 +186,6 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
 
                         float xcoor = e.getX() + e.getCurrentFrame().w / 2;
                         float ycoor = e.getY() + e.getCurrentFrame().h / 2;
-                        int x, y;
-                        Uint32 buttons;
                         buttons = SDL_GetMouseState(&x, &y);
 
                         // mouse should not be released at the same point as ball
@@ -159,12 +219,13 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
                         ball1->setSpeed(min(maxV, radialDis));
                         ball1->setMovingState(false);
                         // Mix_PlayChannel(-1, swing, 0);
+                        // if (ball1->getSpeed() < 5)
+                        holding = 0;
                     }
                 }
 
                 if (event.type == SDL_MOUSEBUTTONDOWN)
                 {
-
                     int x, y;
                     Uint32 buttons;
                     buttons = SDL_GetMouseState(&x, &y);
@@ -177,6 +238,7 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
                     // Do it for left click only
                     if (xcoor - currFrame.w <= x && xcoor + currFrame.w >= x && ycoor - currFrame.h <= y && ycoor + currFrame.h >= y)
                     {
+                        holding = 1;
                         isClicked = false;
                         // cout << x << "\t" << y <<"\n";
                     }
@@ -269,7 +331,6 @@ void MainMenu(RenderWindow window, vector<SDL_Texture *> textures, SDL_Texture *
 
     else if (menu->getWindowType() == "Scores")
     {
-        cout << "Scores\n";
         bool next = HighScores(window, bg);
         if (!next)
         {
@@ -312,7 +373,6 @@ int main(int argc, char *argv[])
     SDL_Texture *bgTexture = window.loadTexture("images/bg.png");
     SDL_Texture *logoTexture = window.loadTexture("images/logo.png");
     SDL_Texture *menuTexture = window.loadTexture("images/menu.png");
-    SDL_Texture *pointTexture = window.loadTexture("images/point.png");
     SDL_Texture *tileDarkTexture32 = window.loadTexture("images/tile32_dark.png");
     SDL_Texture *tileDarkTexture64 = window.loadTexture("images/tile64_dark.png");
     SDL_Texture *tileLightTexture32 = window.loadTexture("images/tile32_light.png");
@@ -320,9 +380,6 @@ int main(int argc, char *argv[])
     SDL_Texture *ballShadowTexture = window.loadTexture("images/ball_shadow.png");
     SDL_Texture *uiBgTexture = window.loadTexture("images/UI_bg.png");
     SDL_Texture *levelTextBgTexture = window.loadTexture("images/levelText_bg.png");
-    SDL_Texture *powerMeterTexture_FG = window.loadTexture("images/powermeter_fg.png");
-    SDL_Texture *powerMeterTexture_BG = window.loadTexture("images/powermeter_bg.png");
-    SDL_Texture *powerMeterTexture_overlay = window.loadTexture("images/powermeter_overlay.png");
     SDL_Texture *click2start = window.loadTexture("images/click2start.png");
     SDL_Texture *endscreenOverlayTexture = window.loadTexture("images/end.png");
     SDL_Texture *playButton = window.loadTexture("images/Play.png");
