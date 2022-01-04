@@ -501,10 +501,12 @@ int main(int argc, char *argv[])
     Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 
     // // SDL_Texture* splashBgTexture = window.loadTexture("images/splashbg.png");
-    Mix_Chunk* charge = Mix_LoadWAV("sfx/charge.mp3");
+    
     Mix_Chunk* swing = Mix_LoadWAV("sfx/swing.mp3");
     Mix_Chunk* hole = Mix_LoadWAV("sfx/hole.mp3");
+    Mix_Music* music = Mix_LoadMUS("sfx/chill.mp3");
 
+    Mix_PlayMusic(music, -1);
     // Entity intro(50, 70, logoTexture);
     // Entity startButton(100, 200, playButton);
     // Entity highScores(400, 200, high_Scores);
