@@ -17,6 +17,8 @@ class RenderWindow
 		void cleanUp();
 		void clear();
 		void render(Entity& p_entity);
+		void RenderText(SDL_Surface* surface, SDL_Rect rect);
+		void renderArrow(Entity &p_entity, Entity &e, int x, int y, double angle, SDL_Point* center);
 		void display();
 		void Background(SDL_Texture* bg);
 		void rndr(SDL_Rect &wall);

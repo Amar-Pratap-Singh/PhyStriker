@@ -1,15 +1,16 @@
 #include "MouseInput.hpp"
 #include <SDL2/SDL.h>
-#include <vector>
 
-std::vector<int> MouseInput::getMouseCoordinate()
+int MouseInput::get_mouse_x()
 {
-	std::vector<int> coordinate;
 	SDL_GetMouseState(&mouse_x, &mouse_y);
-	coordinate.push_back(mouse_x);
-	coordinate.push_back(mouse_y);
+	return mouse_x;
+}
 
-	return coordinate;
+int MouseInput::get_mouse_y()
+{
+	SDL_GetMouseState(&mouse_x, &mouse_y);
+	return mouse_y;
 }
 
 bool MouseInput::checkClick()

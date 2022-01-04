@@ -14,9 +14,8 @@ void Button::DrawButton(RenderWindow* window) {
 }
 
 bool Button::isButtonClicked(MouseInput* mouse) {
-	std::vector<int> coordinate = mouse->getMouseCoordinate();
-	int mouse_x = coordinate[0];
-	int mouse_y = coordinate[1];
+	int mouse_x = mouse->get_mouse_x();
+	int mouse_y = mouse->get_mouse_y();
 
 	int flag = 0;
 
@@ -25,6 +24,6 @@ bool Button::isButtonClicked(MouseInput* mouse) {
 
 	if ((flag == 1) && (mouse->checkClick() == true))
 		return true;
-
+		
 	return false;
 }

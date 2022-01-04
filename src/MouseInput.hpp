@@ -1,6 +1,5 @@
 #pragma once
-#include<iostream>
-#include <vector>
+// #include <inttypes.h>
 
 class MouseInput {
 private:
@@ -8,6 +7,7 @@ private:
 	int mouse_y;
 
 public:
-	std::vector<int> getMouseCoordinate();
+	int get_mouse_x();
+	int get_mouse_y();
 	bool checkClick();
 };

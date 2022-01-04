@@ -46,6 +46,28 @@ void RenderWindow::render(Entity &p_entity){
     SDL_RenderCopy(renderer, p_entity.getTex(), &src, &dst);
 }
 
+void RenderWindow::RenderText(SDL_Surface* surface, SDL_Rect rect){
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect a = {0, 0, 100, 100};
+    SDL_RenderCopy(renderer, tex, &a, &rect);
+}
+
+void RenderWindow::renderArrow(Entity &p_entity, Entity &e, int mouseX, int mouseY, double angle, SDL_Point* center){
+    SDL_Rect src, dst;
+    src.x=p_entity.getCurrentFrame().x;
+    src.y=p_entity.getCurrentFrame().y;
+    src.w=p_entity.getCurrentFrame().w;
+    src.h=p_entity.getCurrentFrame().h;
+    // int x_sign, y_sign;
+    // e.getX() > mouseX ? x_sign = 1 : x_sign = -1;  
+    // e.getY() > mouseY ? y_sign = 1 : y_sign = -1;  
+    dst.x=p_entity.getX() /*x_sign*e.getCurrentFrame().w/2*/;
+    dst.y=p_entity.getY() /*y_sign*e.getCurrentFrame().h/2*/;
+    dst.w=p_entity.getCurrentFrame().w;
+    dst.h=p_entity.getCurrentFrame().h;
+    SDL_RenderCopyEx(renderer, p_entity.getTex(), &src, &dst, angle, center, SDL_FLIP_VERTICAL);
+}
+
 void RenderWindow::DrawRectangle(SDL_Texture* tex, int x_pos, int y_pos, int w, int h) {
 	SDL_Rect* box = (SDL_Rect*)malloc(sizeof(SDL_Rect));
 	box->x = x_pos;
