@@ -506,7 +506,7 @@ int main(int argc, char *argv[])
     Mix_Chunk* hole = Mix_LoadWAV("sfx/hole.mp3");
     Mix_Music* music = Mix_LoadMUS("sfx/chill.mp3");
 
-    Mix_PlayMusic(music, -1);
+    Mix_PlayMusic(music, -10);
     // Entity intro(50, 70, logoTexture);
     // Entity startButton(100, 200, playButton);
     // Entity highScores(400, 200, high_Scores);
