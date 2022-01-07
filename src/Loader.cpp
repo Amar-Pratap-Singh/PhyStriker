@@ -95,40 +95,6 @@ vector<Entity> Loader:: load_tiles(int level)
 	}
 	case (5):
 	{
-		tiles.push_back(Tile(24 + 32 * 3, 24 + 32 * 12, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 5, 24 + 32 * 10, entities[1]));
-		tiles.push_back(Tile(24 + 32 * 7, 24 + 32 * 8, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 9, 24 + 32 * 6, entities[1]));
-
-		tiles.push_back(Tile(24 + 32 * 15, 24 + 32 * 12, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 13, 24 + 32 * 10, entities[1]));
-		tiles.push_back(Tile(24 + 32 * 11, 24 + 32 * 8, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 5, 24 + 32 * 12, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 7, 24 + 32 * 12, entities[0]));
-
-		tiles.push_back(Tile(24 + 32 * 11, 24 + 32 * 12, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 13, 24 + 32 * 12, entities[0]));
-
-		tiles.push_back(Tile(24 + 32 * 7, 24 + 32 * 4, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 5, 24 + 32 * 2, entities[1]));
-		tiles.push_back(Tile(24 + 32 * 3, 24 + 32 * 0, entities[0]));
-
-		tiles.push_back(Tile(24 + 32 * 15, 24 + 32 * 0, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 13, 24 + 32 * 2, entities[1]));
-		tiles.push_back(Tile(24 + 32 * 11, 24 + 32 * 4, entities[0]));
-
-		tiles.push_back(Tile(24 + 32 * 5, 24 + 32 * 0, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 7, 24 + 32 * 0, entities[0]));
-
-		tiles.push_back(Tile(24 + 32 * 11, 24 + 32 * 0, entities[0]));
-		tiles.push_back(Tile(24 + 32 * 13, 24 + 32 * 0, entities[0]));
-
-		tiles.push_back(Entity(24 + 32 * 9, 24 + 32 * 0, entities[5]));
-		tiles.push_back(Entity(24 + 32 * 9, 24 + 32 * 12, entities[4]));
-		break;
-	}
-	case (6):
-	{
 		tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 8, entities[0]));
 		//tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 6, entities[1]));
 		tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 4, entities[0]));
@@ -164,7 +130,7 @@ vector<Entity> Loader:: load_tiles(int level)
 		break;
 	}
 
-	case (7):
+	case (6):
 	{
 		tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 8, entities[0]));
 		tiles.push_back(Tile(24 + 32 * 4, 24 + 32 * 6, entities[1]));

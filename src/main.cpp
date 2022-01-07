@@ -1,67 +1,89 @@
-// Correct the positioning of collision
-// Score system
-// Displaying something on screen, like strike: 1, strike: 2, strike: 3
-// maintain a list f top 5 games played till now with their high score and player name
-// Sound effect
+// Music getting stopped after completing
+// After restart, make that levelStrike count as 0
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 #include <iostream>
+#include <fstream>
+#include <map>
+#include <algorithm>
 #include <vector>
 #include <iterator>
 #include <unistd.h>
-// #include <string.h>
-#include <queue>
+
 #include "RenderWindow.hpp"
 #include "Entity.hpp"
 #include "Ball.hpp"
 #include "Loader.hpp"
 #include "Menu.hpp"
-// #include "SDL2/SDL_mixer.h"
 
 using namespace std;
 
 static int level = 1;
-static bool isClicked = true, restarted = false, levelLoaded = true, goal = false;
-static priority_queue<pair<int, string>> scores;
+static bool isClicked = true, restarted = false, levelLoaded = true;
 static vector<Entity> blocks;
 static vector<Entity> pointerAndMeters;
 static int TotalStrikes = 0;
-static int levelsCleared = 0; 
+static int levelsCleared = 0;
 static int TotalScore;
+static map<string, int> hashmap; // Add elements at the start of game by asking user Input
+string PlayerName;
 
-pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball, SDL_Texture *bg, RenderWindow window, TTF_Font* font)
+void NoteDownScores()
+{
+    ifstream fin;
+    fin.open("Scores/HighScore.txt");
+    string HighScore_scoreLine;
+
+    getline(fin, HighScore_scoreLine);
+    string score = HighScore_scoreLine.substr(HighScore_scoreLine.length() - 3, 3);
+    string Score_scoreLine = PlayerName + " " + to_string(TotalScore);
+    fin.close();
+
+    if (score < to_string(TotalScore))
+    {
+        ofstream fout("Scores/HighScore.txt");
+        fout << Score_scoreLine;
+
+        fout.close();
+    }
+
+    // add it to the Scores
+    ofstream fout;
+    fout.open("Scores/Scores.txt", ios::app);
+    fout << PlayerName + " " + to_string(TotalScore) << "\n";
+    fout.close();
+}
+
+pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball, SDL_Texture *bg, RenderWindow window, TTF_Font *font)
 {
     isClicked = true;
     Loader *loader = new Loader(textures);
-    // 0 : tile32 light
-    // 1 : tile32 dark
-    // 2 : tile64 light
-    // 3 : tile64 dark
-    // 4 : ball
-    // 5 : hole
-    // 6 : shadow
 
     blocks = loader->load_tiles(level);
-    if (blocks.size() == 0){
+    if (blocks.size() == 0)
+    {
+        font = TTF_OpenFont("fonts/HandyRegular.ttf", 18);
         window.clear();
         window.Background(bg);
-        
-        // Just for use, have to change it later
-        TotalScore = levelsCleared*100 - TotalStrikes; // Need to think of a formula to calculate total scores with total Strikes and levelsCLeared
-        
-        string s = to_string(TotalScore);
+        TotalScore = 100 * levelsCleared - TotalStrikes;
+        string s = "Score: " + to_string(TotalScore);
         const char *c = s.c_str();
-        SDL_Surface* GameCompleted = TTF_RenderText_Solid(font, "Bravo!!", {255, 255, 0});
-        SDL_Surface* YourScore = TTF_RenderText_Solid(font, c, {255, 0, 0});
+        SDL_Surface *GameCompleted = TTF_RenderText_Solid(font, "Bravo!!", {255, 255, 0});
+        SDL_Surface *YourScore = TTF_RenderText_Solid(font, c, {255, 0, 0});
         SDL_Rect rect = {220, 0, 180, 80};
-        SDL_Rect rect2 = {340, 300, 180, 80};
+        SDL_Rect rect2 = {220, 300, 180, 80};
         window.RenderText(GameCompleted, rect);
         window.RenderText(YourScore, rect2);
         window.display();
+
+        hashmap[PlayerName] = TotalScore;
         sleep(2);
+
+        NoteDownScores();
+
         Entity e(0, 0, NULL);
         Entity f(0, 0, NULL);
         return {e, f};
@@ -75,14 +97,19 @@ pair<Entity, Entity> levelLoader(vector<SDL_Texture *> textures, Ball *ball, SDL
     blocks.erase(blocks.end() - 1);
     blocks.erase(blocks.end() - 1);
 
-    for (int i = 0; i < blocks.size(); i++)
+    for (long unsigned int i = 0; i < blocks.size(); i++)
         ball->AddtoFlag({0, 0});
 
     return {e, f};
 }
 
-void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window, SDL_Texture *bg, Button *restart, TTF_Font* font, Mix_Chunk *swing, Mix_Chunk *hole)
+void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window, SDL_Texture *bg, Button *restart, TTF_Font *font, Mix_Chunk *swing, Mix_Chunk *hole, Mix_Chunk *chill)
 {
+    cout << "Player Name: ";
+    cin >> PlayerName;
+
+    Mix_PlayChannel(1, chill, 0);
+
     // int state = 1;
     const int FPS = 60;
     const int frameDelay = 1000 / FPS;
@@ -103,7 +130,7 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
     SDL_Texture *powerMeterTexture_GG5 = window.loadTexture("images/powermeter_gg5.png");
     SDL_Texture *powerMeterTexture_GG = window.loadTexture("images/powermeter_gg.png");
     SDL_Texture *powerMeterTexture_overlay = window.loadTexture("images/powermeter_overlay.png");
-    
+
     Entity pm1(50, 8, powerMeterTexture_GG1);
     Entity pm2(50, 8, powerMeterTexture_GG2);
     Entity pm3(50, 8, powerMeterTexture_GG3);
@@ -119,7 +146,8 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
 
     pointerAndMeters = {pm1, pm2, pm3, pm4, pm5, pm6, pm};
 
-    for (int z = 1; z < pointerAndMeters.size() ; z++){
+    for (long unsigned int z = 1; z < pointerAndMeters.size(); z++)
+    {
         pointerAndMeters[z].setCurrFrame(resize);
     }
 
@@ -143,11 +171,12 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
         window.render(f);
         window.render(e);
 
-        if (levelLoaded){
+        if (levelLoaded)
+        {
             levelLoaded = false;
-            string s = "Level " + to_string(level); 
+            string s = "Level " + to_string(level);
             const char *c = s.c_str();
-            SDL_Surface* NewLevel = TTF_RenderText_Solid(font, c, {255, 255, 0});
+            SDL_Surface *NewLevel = TTF_RenderText_Solid(font, c, {255, 255, 0});
             SDL_Rect rect = {220, 0, 180, 80};
             window.RenderText(NewLevel, rect);
             window.display();
@@ -168,19 +197,21 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
 
         if (!LevelRunning)
         {
-            level++;
             levelsCleared = level;
+            level++;
             levelLoaded = true;
             BallHole = levelLoader(textures, ball1, bg, window, font);
             e = BallHole.first;
             f = BallHole.second;
-            
-            if (!e.getTex() && !f.getTex()){
+
+            if (!e.getTex() && !f.getTex())
+            {
                 return;
             }
 
-            if (!restarted){
-                SDL_Surface* Goal = TTF_RenderText_Solid(font, "GOAL!", {0, 0, 255}); 
+            if (!restarted)
+            {
+                SDL_Surface *Goal = TTF_RenderText_Solid(font, "GOAL!", {0, 0, 255});
                 SDL_Rect rect = {220, 280, 200, 100};
                 window.RenderText(Goal, rect);
                 window.display();
@@ -192,22 +223,23 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
         }
         // SDL_Event event;
         int x, y;
-        Uint32 buttons;
-        buttons = SDL_GetMouseState(&x, &y);
+        SDL_GetMouseState(&x, &y);
 
-        if (holding){
-            Entity p(e.getX()+e.getCurrentFrame().w/2, e.getY()+e.getCurrentFrame().h/2, pointTexture);
-            SDL_Point Center{0,0};
-            int Delta_x; int Delta_y;
+        if (holding)
+        {
+            Entity p(e.getX() + e.getCurrentFrame().w / 2, e.getY() + e.getCurrentFrame().h / 2, pointTexture);
+            SDL_Point Center{0, 0};
+            int Delta_x;
+            int Delta_y;
             double Result;
             SDL_GetMouseState(&x, &y);
-            Delta_x = e.getX()+e.getCurrentFrame().w/2 - x;
-            Delta_y = e.getY()+e.getCurrentFrame().h/2 - y;
+            Delta_x = e.getX() + e.getCurrentFrame().w / 2 - x;
+            Delta_y = e.getY() + e.getCurrentFrame().h / 2 - y;
 
-            Result = (atan2(Delta_y, Delta_x) * 180.0000)/ 3.14159265;
+            Result = (atan2(Delta_y, Delta_x) * 180.0000) / 3.14159265;
             window.renderArrow(p, e, x, y, Result - 90, &Center);
 
-            float temp = sqrt(pow(x-e.getX()-e.getCurrentFrame().w/2, 2) + pow(y-e.getY()-e.getCurrentFrame().h/2, 2));  
+            float temp = sqrt(pow(x - e.getX() - e.getCurrentFrame().w / 2, 2) + pow(y - e.getY() - e.getCurrentFrame().h / 2, 2));
             int index = 0;
 
             if (temp <= 10)
@@ -225,12 +257,12 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
             else if (temp < 85)
                 index = 5;
 
-            else if (temp > 85) 
+            else if (temp > 85)
                 index = 6;
-            
+
             // window.render(pointerAndMeters[0]);
-            window.render(pointerAndMeters[index-1]);
-            window.render(pointerAndMeters[pointerAndMeters.size()-1]);
+            window.render(pointerAndMeters[index - 1]);
+            window.render(pointerAndMeters[pointerAndMeters.size() - 1]);
         }
 
         while (SDL_PollEvent(&event))
@@ -250,10 +282,11 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
                     if (!isClicked)
                     {
                         isClicked = true;
+                        Mix_PlayChannel(-1, swing, 0);
 
                         float xcoor = e.getX() + e.getCurrentFrame().w / 2;
                         float ycoor = e.getY() + e.getCurrentFrame().h / 2;
-                        buttons = SDL_GetMouseState(&x, &y);
+                        SDL_GetMouseState(&x, &y);
 
                         // mouse should not be released at the same point as ball
                         float xDir = abs(xcoor - x);
@@ -285,7 +318,7 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
 
                         ball1->setSpeed(min(maxV, radialDis));
                         ball1->setMovingState(false);
-                        Mix_PlayChannel(-1, swing, 0);
+                        // Mix_PlayChannel(-1, swing, 0);
                         holding = 0;
                     }
                 }
@@ -293,8 +326,8 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
                 if (event.type == SDL_MOUSEBUTTONDOWN)
                 {
                     int x, y;
-                    Uint32 buttons;
-                    buttons = SDL_GetMouseState(&x, &y);
+                    // Uint32 buttons;
+                    SDL_GetMouseState(&x, &y);
 
                     float xcoor = e.getX();
                     float ycoor = e.getY();
@@ -307,7 +340,6 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
                         TotalStrikes++;
                         holding = 1;
                         isClicked = false;
-                        // cout << x << "\t" << y <<"\n";
                     }
                 }
             }
@@ -323,67 +355,32 @@ void PhyStriker(vector<SDL_Texture *> textures, Ball *ball1, RenderWindow window
     }
 }
 
-bool HighScores(RenderWindow window, SDL_Texture* bg, TTF_Font *font)
+bool cmp(pair<string, int> &a, pair<string, int> &b)
 {
-    vector<pair<int, string>> displayScores;
-    int index = 1;
+    return a.second < b.second;
+}
 
-    if (scores.size() < 5)
-    {
-        while (!scores.empty())
-        {
-            displayScores.push_back(scores.top());
-            scores.pop();
-        }
-    }
-    else
-    {
-        while (displayScores.size() != 5)
-        {
-            displayScores.push_back(scores.top());
-            scores.pop();
-        }
-    }
-    
+bool HighScores(RenderWindow window, SDL_Texture *bg, TTF_Font *font)
+{
     bool viewHighScore = true;
     Button *back = new Button(0, 0, 50, 50, "images/back.png");
-
     MouseInput *mouse = new MouseInput();
-
     SDL_Event event;
-    
-    vector <SDL_Surface*> ScoreTexts(5);
-    vector <SDL_Rect> rects(5);
-    // SDL_Surface* ScoreText = TTF_RenderText_Solid(font, "", {0, 0, 255}); 
-    // SDL_Rect rect = {220, 280, 200, 100};
-    // window.RenderText(Goal, rect);
-    // window.display();
-    string s = "Ranking\tScore\tGoals\tStrikes";
-    const char* c = s.c_str();
-    ScoreTexts[0] = TTF_RenderText_Solid(font, c, {255, 247, 0}); 
-    rects[0] = {0, 0, 600, 30}; 
 
-    for (int i = 1; i<6 ;i++)
+    string k;
+    ifstream fin;
+    fin.open("Scores/HighScore.txt");
+    if (fin.is_open())
     {
-        // Create hashmap of username and levelsCleared, TotalStrikes
-        // Pass them below
-        // Add these values when a player finishes the game
-        s = to_string(i) + "\t" + to_string(displayScores[i-1].first) + "\t" + to_string(levelsCleared) + "\t" + to_string(TotalStrikes); 
-        c = s.c_str();
-        ScoreTexts[i] = TTF_RenderText_Solid(font, c, {255, 255, 255});
-        SDL_Rect temp;
-        temp.h = rects[i-1].h;
-        temp.w = rects[i-1].w;
-        temp.x = rects[i-1].x;
-        temp.y = rects[i-1].y + rects[i-1].h;
-        rects[i] = temp;
-    
-        scores.push(displayScores[i-1]);
+        getline(fin, k);
     }
+    fin.close();
 
+    const char *c = k.c_str();
     while (viewHighScore)
     {
-        if (back->isButtonClicked(mouse)){
+        if (back->isButtonClicked(mouse))
+        {
             viewHighScore = false;
             return true;
         }
@@ -397,55 +394,60 @@ bool HighScores(RenderWindow window, SDL_Texture* bg, TTF_Font *font)
         }
 
         window.clear();
-        for (int i=0; i<6 ;i++){
-            window.RenderText(ScoreTexts[i], rects[i]);
-        }
-        // Keep rendering all the scores
-        // text rendering onto screen
         window.Background(bg);
+
+        SDL_Surface *ScoreText = TTF_RenderText_Solid(font, c, {0, 0, 255});
+        SDL_Rect rect = {220, 280, 200, 100};
+        window.RenderText(ScoreText, rect);
         back->DrawButton(&window);
         window.display();
     }
-    
-    return true;
 
+    return true;
 }
 
-void MainMenu(RenderWindow window, vector<SDL_Texture *> textures, SDL_Texture *bg, TTF_Font* font, Mix_Chunk *swing, Mix_Chunk *hole)
+void MainMenu(RenderWindow window, vector<SDL_Texture *> textures, SDL_Texture *bg, TTF_Font *font, Mix_Chunk *swing, Mix_Chunk *hole, Mix_Chunk *chill)
 {
     Menu *menu = new Menu(&window);
-
-    menu->MenuLoop(font);
+    TTF_Font *font2 = TTF_OpenFont("fonts/HandyRegular.ttf", 21);
+    menu->MenuLoop(font2);
     if (menu->getWindowType() == "Exit" || menu->getWindowType() == "Main_Menu")
     {
         return;
     }
 
     else if (menu->getWindowType() == "Scores")
-    {
-        bool next = HighScores(window, bg, font);
+    {        
+        TTF_Font *font2 = TTF_OpenFont("fonts/Regular.ttf", 40);
+        if (!font)
+        {
+            printf("TTF_OpenFont: %s\n", TTF_GetError());
+        }
+
+        bool next = HighScores(window, bg, font2);
         if (!next)
         {
             return;
         }
 
-        else{
-            MainMenu(window, textures, bg, font, swing, hole);
+        else
+        {
+            MainMenu(window, textures, bg, font, swing, hole, chill);
         }
     }
 
     else if (menu->getWindowType() == "Game")
     {
         Button *restart = new Button(0, 0, 50, 50, "images/Restart2.png");
-
+        SDL_Texture* bg2 = window.loadTexture("images/bg.png");
         Ball *ball = new Ball();
-        PhyStriker(textures, ball, window, bg, restart, font, swing, hole);
+        PhyStriker(textures, ball, window, bg2, restart, font, swing, hole, chill);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    
+
     if (SDL_Init(SDL_INIT_VIDEO) > 0)
     {
         cout << "SDL_Init failure." << SDL_GetError() << endl;
@@ -455,64 +457,37 @@ int main(int argc, char *argv[])
     {
         cout << "IMG_Init failure." << SDL_GetError() << endl;
     }
-    
-    if(TTF_Init() == -1){
+
+    if (TTF_Init() == -1)
+    {
         cout << "SDL2_ttf failure." << TTF_GetError() << endl;
     }
-   
-    TTF_Font* font = TTF_OpenFont("fonts/Raleway-Black.ttf", 16);
-    if(!font) {
+
+    TTF_Font *font = TTF_OpenFont("fonts/Regular.ttf", 40);
+    if (!font)
+    {
         printf("TTF_OpenFont: %s\n", TTF_GetError());
     }
 
-    RenderWindow window("PhyStriker", 640, 720);
-    
-    // SDL_Color white = {255, 255, 255};
-    // SDL_Color black = {0, 0, 0};
-    // SDL_Color red = {255, 0, 0};
-    // SDL_Color green = {0, 255, 0};
-    // SDL_Color blue = {0, 0, 255};
-    
-    // SDL_Surface* surface_New_game = TTF_RenderText_Solid(font,"New Game", color);
-    // SDL_Rect rect = {100, 100, 50, 50};
-    // window.RenderText(surface_New_game, rect, "New Game");
-
+    RenderWindow window("PhyStriker", 670, 700);
 
     SDL_Texture *ballTexture = window.loadTexture("images/ball.png");
     SDL_Texture *holeTexture = window.loadTexture("images/hole.png");
     SDL_Texture *bg2Texture = window.loadTexture("images/1232.png");
-    SDL_Texture *blockTexture = window.loadTexture("images/block.png");
-    SDL_Texture *bgTexture = window.loadTexture("images/bg.png");
-    SDL_Texture *logoTexture = window.loadTexture("images/logo.png");
-    SDL_Texture *menuTexture = window.loadTexture("images/menu.png");
     SDL_Texture *tileDarkTexture32 = window.loadTexture("images/tile32_dark.png");
     SDL_Texture *tileDarkTexture64 = window.loadTexture("images/tile64_dark.png");
     SDL_Texture *tileLightTexture32 = window.loadTexture("images/tile32_light.png");
     SDL_Texture *tileLightTexture64 = window.loadTexture("images/tile64_light.png");
     SDL_Texture *ballShadowTexture = window.loadTexture("images/ball_shadow.png");
-    SDL_Texture *uiBgTexture = window.loadTexture("images/UI_bg.png");
-    SDL_Texture *levelTextBgTexture = window.loadTexture("images/levelText_bg.png");
-    SDL_Texture *click2start = window.loadTexture("images/click2start.png");
-    SDL_Texture *endscreenOverlayTexture = window.loadTexture("images/end.png");
-    SDL_Texture *playButton = window.loadTexture("images/Play.png");
-    SDL_Texture *RestartButton = window.loadTexture("images/Restart.jpg");
-    SDL_Texture *high_Scores = window.loadTexture("images/HighScore.png");
 
     Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+    Mix_Chunk *swing = Mix_LoadWAV("sfx/swing.mp3");
+    Mix_Chunk *hole = Mix_LoadWAV("sfx/hole.mp3");
+    Mix_Chunk *chill = Mix_LoadWAV("sfx/chill.mp3");
 
-    // // SDL_Texture* splashBgTexture = window.loadTexture("images/splashbg.png");
-    
-    Mix_Chunk* swing = Mix_LoadWAV("sfx/swing.mp3");
-    Mix_Chunk* hole = Mix_LoadWAV("sfx/hole.mp3");
-    Mix_Music* music = Mix_LoadMUS("sfx/chill.mp3");
-
-    Mix_PlayMusic(music, 10);
-    // Entity intro(50, 70, logoTexture);
-    // Entity startButton(100, 200, playButton);
-    // Entity highScores(400, 200, high_Scores);
     vector<SDL_Texture *> textures = {tileLightTexture32, tileDarkTexture32, tileLightTexture64, tileDarkTexture64, ballTexture, holeTexture, ballShadowTexture};
 
-    MainMenu(window, textures, bg2Texture, font, swing, hole);
+    MainMenu(window, textures, bg2Texture, font, swing, hole, chill);
 
     window.cleanUp();
     TTF_CloseFont(font);

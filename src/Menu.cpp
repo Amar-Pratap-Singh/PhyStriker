@@ -8,9 +8,9 @@ void Menu::MenuLoop(TTF_Font* font) {
 	Quit = false;
 
 	screen = window->loadTexture("images/menu.png");
-	play = new Button(10, 10, 100, 200, "images/Play.png");
-	exit = new Button(150, 10, 100, 50, "images/exit.png");
-	TopScores = new Button(270, 10, 100, 50, "images/High.png");
+	play = new Button(window->w()-100, 60, 100, 100, "images/play.png");
+	TopScores = new Button(window->w()-100, 150, 100, 50, "images/HighScore2.png");
+	exit = new Button(window->w()-100, 200, 100, 50, "images/exit.png");
 
 	MouseInput* mouse = new MouseInput();
  
@@ -27,9 +27,9 @@ void Menu::MenuLoop(TTF_Font* font) {
 
 		if (Main_Menu) {
 			window->clear();        
-
+			
 			SDL_Surface* PHYStriker = TTF_RenderText_Solid(font, "PhyStriker", {255, 255, 255});
-			SDL_Rect rect = {0, 650, 200, 50};
+			SDL_Rect rect = {0, 650, 150, 50};
 
  			SDL_PumpEvents();
 			window->Background(screen);

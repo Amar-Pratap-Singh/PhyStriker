@@ -100,7 +100,7 @@ bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level , 
     if (a.h <= 0 && a.w <= 0)
     {
         // speed = 0;
-        Mix_PlayChannel(-1, hole, 0);
+        // Mix_PlayChannel(-1, hole, 0);
         dropping = false;
         flags.clear();
 
@@ -119,7 +119,7 @@ bool Ball::droppingBall(Entity &e, Entity &f, RenderWindow &window, int level , 
 // ***************************************** Collision ************************************
 pair<bool, bool> Ball::Collision(Entity &e, Entity &b, bool flagX, bool flagY)
 {
-
+    
     float xcoor = e.getX();
     float ycoor = e.getY();
 
@@ -179,6 +179,7 @@ bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
         if (x >= f.getX() + f.getCurrentFrame().w / 4 && x <= f.getX() + 3 * f.getCurrentFrame().w / 4 && y >= f.getY() + f.getCurrentFrame().h / 4 && y <= f.getY() + 3 * f.getCurrentFrame().h / 4)
         {
             dropping = true;
+            Mix_PlayChannel(-1, hole, 0);
             SDL_Rect k;
             k = e.getCurrentFrame();
             k.h /= 2;
@@ -208,6 +209,11 @@ bool Ball::moveBall(Entity &e, Entity &f, vector<Entity> &b, RenderWindow &windo
                 flags[i] = Collision(e, entities, flags[i].first, flags[i].second);
                 i++;
             }
+
+            // else if (e.getX()+e.getCurrentFrame().w >= entities.getX() && ){
+            //     xdir *= -1;
+            //     ydir *= -1;
+            // }
 
             // can also decrease the speed here
             if (speed < 0)
