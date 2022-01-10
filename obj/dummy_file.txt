@@ -1,0 +1,2 @@
+This is a dummy file to create a empty folder "obj" in my repo. 
+In this folder, all the ".o" files will be created.
